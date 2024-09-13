@@ -399,7 +399,7 @@ module Unikraft = struct
   let build_packages =
     [
       Functoria.package ~min:"0.0.1" ~max:"1.0.0" ~scope:`Switch ~build:true
-        "ocaml-unikraft-x86_64";
+        "ocaml-unikraft";
       Functoria.package ~min:"0.0.1" ~max:"1.0.0" "mirage-unikraft";
     ]
 
@@ -407,10 +407,10 @@ module Unikraft = struct
     match target with
     | `Firecracker ->
         [ Functoria.package ~min:"0.0.1" ~max:"1.0.0" ~scope:`Switch ~build:true
-          "ocaml-unikraft-backend-fc-x86_64" ]
+          "ocaml-unikraft-backend-fc" ]
     | `QEMU ->
         [ Functoria.package ~min:"0.0.1" ~max:"1.0.0" ~scope:`Switch ~build:true
-          "ocaml-unikraft-backend-qemu-x86_64" ]
+          "ocaml-unikraft-backend-qemu" ]
 
   let packages target = build_packages @ backend_packages target
   let context_name _ = "unikraft"
@@ -429,7 +429,7 @@ module Unikraft = struct
  (default
   (name %s)
   (host default)
-  (toolchain unikraft_x86_64)
+  (toolchain unikraft)
   (env
    (_
     (flags :standard -cclib "-z unikraft-backend=%s")
@@ -482,7 +482,6 @@ module Unikraft = struct
   let main i =
     let libraries = Info.libraries i in
     let main = Fpath.to_string (main i) in
-    let target = Info.get i Key.target in
     let pp_list f = Dune.compact_list f in
     Dune.stanzaf
     {|
@@ -491,14 +490,13 @@ module Unikraft = struct
  (name %s)
  (modes (native exe))
  (libraries %a)
- (link_flags %a -cclib "-z unikraft-backend=%s")
+ (link_flags %a)
 )
 |}
       (context_name i)
       main (pp_list "libraries")
       libraries (pp_list "link_flags")
       flags
-      (unikraft_abi target)
 
   let dune i = [ main i; rename i ]
 
